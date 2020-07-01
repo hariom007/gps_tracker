@@ -122,7 +122,12 @@ class _DashBoardState extends State<DashBoard> {
                   isSwitched2 = isOn;
                   Global.shared.isSwitched2 = isOn;
                   isOn =! isOn;
-                  Timer.periodic(Duration(seconds: 5), (Timer t) => _onSwitchClick());
+                  Timer.periodic(
+                      Duration(seconds: 5),
+                          (Timer t) {
+                            isSwitched2 ? _onSwitchClick() : Container();
+                          }
+                  );
                   print(isSwitched2);
                 });
               },
