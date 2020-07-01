@@ -9,36 +9,47 @@ import 'package:gpstracker/Api/api.dart';
 import 'package:gpstracker/UI/Navigator/MyNavigator.dart';
 import 'package:gpstracker/Values/AppColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timer_builder/timer_builder.dart';
 
 class DashBoard extends StatefulWidget {
   @override
   _DashBoardState createState() => _DashBoardState();
 }
+class Global{
+  static final shared =Global();
+//  bool isInstructionView = false;
+  bool isSwitched2 = false;
+}
 
 class _DashBoardState extends State<DashBoard> {
+
+//  bool isInstructionView;
+  bool isSwitched2;
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
-  bool isSwitched = false;
+//  bool isSwitched = false;
   int _status = 0;
   Position _currentPosition;
   String latitu,longi;
 
+  Timer timer;
 
-
+  @override
   void initState() {
+//    isInstructionView = Global.shared.isInstructionView;
+    isSwitched2 = Global.shared.isSwitched2;
     super.initState();
   }
-/*
+
   @override
   void dispose() {
-    _getCurrentLocation();
-  }*/
+    super.dispose();
+  }
 
   void _onSwitchClick() async {
-    if(_currentPosition !=null){
+    if(_currentPosition !=null) {
        latitu =_currentPosition.latitude.toString();
        longi = _currentPosition.longitude.toString();
     }
-
     var data = {
       "id":"1",
       "driver_id":"3",
@@ -46,7 +57,6 @@ class _DashBoardState extends State<DashBoard> {
       "longitude":longi,
       "is_completed": "0"
     };
-//    print(data);
     try {
       var res = await CallApi().postData(data, 'getDriverLocation');
       var body = json.decode(res.body);
@@ -82,7 +92,7 @@ class _DashBoardState extends State<DashBoard> {
         title: Text('Koffeekodes'),
         automaticallyImplyLeading: false,
         actions: <Widget>[
-          Tooltip(
+          /*  Tooltip(
             message: 'Turned on/off GPS',
             child: Switch(
               value: isSwitched,
@@ -92,7 +102,7 @@ class _DashBoardState extends State<DashBoard> {
                     isSwitched == value ?
                     Timer.periodic(Duration(seconds: 5), (Timer t) =>
                           _onSwitchClick()
-                        ):
+                        ) :
                     setState(() {
                     MyNavigator.goToDashBoardWithKill(context);
                     });
@@ -102,7 +112,39 @@ class _DashBoardState extends State<DashBoard> {
               activeTrackColor: Colors.red,
               activeColor: Colors.green,
             ),
-          )
+          ),*/
+          Tooltip(
+            message: 'Turned on/off GPS',
+            child: Switch(
+              value: isSwitched2,
+              onChanged: (bool isOn) {
+                setState(() {
+                  isSwitched2 = isOn;
+                  Global.shared.isSwitched2 = isOn;
+                  isOn =! isOn;
+                  Timer.periodic(Duration(seconds: 5), (Timer t) => _onSwitchClick());
+                  print(isSwitched2);
+                });
+              },
+              activeTrackColor: Colors.red,
+              activeColor: Colors.green,
+            ),
+          ),
+          /*Switch(
+            value: isInstructionView,
+            onChanged: (bool isOn) {
+              print(isOn);
+              setState(() {
+                isInstructionView = isOn;
+                Global.shared.isInstructionView = isOn;
+                isOn =!isOn;
+                print(isInstructionView);
+              });
+            },
+            activeColor: Colors.blue,
+            inactiveTrackColor: Colors.grey,
+            inactiveThumbColor: Colors.grey,
+          ),*/
         ],
       ),
       body: ListView(
