@@ -370,11 +370,6 @@ class _DashBoardState extends State<DashBoard> {
                   ],
                 ),
                 Divider(thickness: 0.9,),
-
-if (_currentPosition != null)
-Text(
-"LAT: ${_currentPosition.latitude}, LNG: ${_currentPosition.longitude}"),
-
               ],
             ),
           ),
