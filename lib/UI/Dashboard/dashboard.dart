@@ -92,7 +92,7 @@ class _DashBoardState extends State<DashBoard> {
                     isSwitched == value ?
                     Timer.periodic(Duration(seconds: 5), (Timer t) =>
                           _onSwitchClick()
-                        ) :
+                        ):
                     setState(() {
                     MyNavigator.goToDashBoardWithKill(context);
                     });
