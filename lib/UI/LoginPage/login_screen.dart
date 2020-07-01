@@ -16,7 +16,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final _formKey = GlobalKey<FormState>();
   int _state = 0;
-
   Widget _submitButton() {
     return
       new RawMaterialButton(

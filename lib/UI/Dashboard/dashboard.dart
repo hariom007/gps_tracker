@@ -27,7 +27,7 @@ class _DashBoardState extends State<DashBoard> {
   bool isSwitched2;
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
 //  bool isSwitched = false;
-  int _status = 0;
+//  int _status = 0;
   Position _currentPosition;
   String latitu,longi;
 
