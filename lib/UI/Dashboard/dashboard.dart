@@ -1,38 +1,65 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gpstracker/Api/api.dart';
 import 'package:gpstracker/UI/Navigator/MyNavigator.dart';
 import 'package:gpstracker/Values/AppColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashBoard extends StatefulWidget {
   @override
   _DashBoardState createState() => _DashBoardState();
 }
 
-
 class _DashBoardState extends State<DashBoard> {
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
-
   bool isSwitched = false;
   int _status = 0;
   Position _currentPosition;
-  String _currentAddress;
+  String latitu,longi;
 
-  @override
+
+
   void initState() {
     super.initState();
   }
-
+/*
   @override
   void dispose() {
     _getCurrentLocation();
-    _getAddressFromLatLng();
+  }*/
+
+  void _onSwitchClick() async {
+    if(_currentPosition !=null){
+       latitu =_currentPosition.latitude.toString();
+       longi = _currentPosition.longitude.toString();
+    }
+
+    var data = {
+      "id":"1",
+      "driver_id":"3",
+      "latitude": latitu,
+      "longitude":longi,
+      "is_completed": "0"
+    };
+//    print(data);
+    try {
+      var res = await CallApi().postData(data, 'getDriverLocation');
+      var body = json.decode(res.body);
+      print(body);
+      if (body != null && body['response'] != 'Invalid')
+        {
+          _getCurrentLocation();
+        }
+    }
+    catch(e){
+      print('print error: $e');
+    }
   }
-
-
 
   _getCurrentLocation() {
     final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
@@ -42,28 +69,10 @@ class _DashBoardState extends State<DashBoard> {
       setState(() {
         _currentPosition = position;
       });
-      _getAddressFromLatLng();
     }).catchError((e) {
       print(e);
     });
   }
-
-  _getAddressFromLatLng() async {
-    try {
-      List<Placemark> p = await geolocator.placemarkFromCoordinates(
-          _currentPosition.latitude, _currentPosition.longitude);
-
-      Placemark place = p[0];
-
-      setState(() {
-        _currentAddress =
-        "${place.locality}, ${place.postalCode}, ${place.country}";
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
-
 
 
   @override
@@ -80,14 +89,13 @@ class _DashBoardState extends State<DashBoard> {
               onChanged: (value) {
                 if (isSwitched = true) {
                   setState(() {
-                    isSwitched==value ? Timer.periodic(Duration(seconds: 3), (Timer t) =>
-                        setState(() {
-                          _status=0;
-                          _getCurrentLocation();
-                          print(_currentPosition.toString());
-                          print(_currentAddress);
-                        })) :
+                    isSwitched == value ?
+                    Timer.periodic(Duration(seconds: 5), (Timer t) =>
+                          _onSwitchClick()
+                        ) :
+                    setState(() {
                     MyNavigator.goToDashBoardWithKill(context);
+                    });
                   });
                 }
               },
@@ -128,6 +136,19 @@ class _DashBoardState extends State<DashBoard> {
                             SizedBox(height: 3,),
                             Text('Guru Krupa nagar, Veer Bhagat chawl, Bhargav road, Kubernagr-382340, Ahmedabad',
                             style: TextStyle(fontSize: 14),),
+                            SizedBox(height: 3,),
+                            RichText(
+                              text: TextSpan(
+                                  style: GoogleFonts.montserrat(
+                                      color: AppColors.black,
+                                      fontSize: 12
+                                  ),
+                                  children: [
+                                    TextSpan(text: 'Contact us - '),
+                                    TextSpan(text: '7802852664'),
+                                  ]
+                              ),
+                            ),
                             SizedBox(height: 5,),
                             Row(
                               children: <Widget>[
@@ -248,6 +269,19 @@ class _DashBoardState extends State<DashBoard> {
                             SizedBox(height: 3,),
                             Text('K.R. Complex, Jhansi Garden,Udhana road, Surat',
                             style: TextStyle(fontSize: 14),),
+                            SizedBox(height: 3,),
+                            RichText(
+                              text: TextSpan(
+                                  style: GoogleFonts.montserrat(
+                                      color: AppColors.black,
+                                      fontSize: 12
+                                  ),
+                                  children: [
+                                    TextSpan(text: 'Contact us - '),
+                                    TextSpan(text: '9726289580'),
+                                  ]
+                              ),
+                            ),
                             SizedBox(height: 5,),
                             Row(
                               children: <Widget>[
@@ -335,7 +369,12 @@ class _DashBoardState extends State<DashBoard> {
                     )
                   ],
                 ),
-                Divider(thickness: 0.9,)
+                Divider(thickness: 0.9,),
+
+if (_currentPosition != null)
+Text(
+"LAT: ${_currentPosition.latitude}, LNG: ${_currentPosition.longitude}"),
+
               ],
             ),
           ),
