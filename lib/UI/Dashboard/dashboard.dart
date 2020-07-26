@@ -24,12 +24,14 @@ class Global{
 class _DashBoardState extends State<DashBoard> {
 
 //  bool isInstructionView;
+  SharedPreferences sharedPreferences;
   bool isSwitched2;
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
 //  bool isSwitched = false;
 //  int _status = 0;
   Position _currentPosition;
   String latitu,longi;
+  String trip_id="";
 
   Timer timer;
 
@@ -45,14 +47,18 @@ class _DashBoardState extends State<DashBoard> {
     super.dispose();
   }
 
+
+
   void _onSwitchClick() async {
     if(_currentPosition !=null) {
        latitu =_currentPosition.latitude.toString();
        longi = _currentPosition.longitude.toString();
     }
+    sharedPreferences = await SharedPreferences.getInstance();
+    String uid = sharedPreferences.getString('uid');
     var data = {
-      "id":"1",
-      "driver_id":"3",
+      "id":trip_id,
+      "driver_id":uid,
       "latitude": latitu,
       "longitude":longi,
       "is_completed": "0"
@@ -61,10 +67,42 @@ class _DashBoardState extends State<DashBoard> {
       var res = await CallApi().postData(data, 'getDriverLocation');
       var body = json.decode(res.body);
       print(body);
-      if (body != null && body['response'] != 'Invalid')
+      if (body != null && body['txt'] != 'Invalid')
         {
           _getCurrentLocation();
+          if(body.containsKey("id"))
+            {
+              trip_id = body['id'].toString();
+            }
         }
+    }
+    catch(e){
+      print('print error: $e');
+    }
+  }
+
+  void _onSwitchCloseClick() async {
+    if(_currentPosition !=null) {
+      latitu =_currentPosition.latitude.toString();
+      longi = _currentPosition.longitude.toString();
+    }
+    sharedPreferences = await SharedPreferences.getInstance();
+    String uid = sharedPreferences.getString('uid');
+    var data = {
+      "id":trip_id,
+      "driver_id":uid,
+      "latitude": latitu,
+      "longitude":longi,
+      "is_completed": "1"
+    };
+    try {
+      var res = await CallApi().postData(data, 'getDriverLocation');
+      var body = json.decode(res.body);
+      print(body);
+      if (body != null && body['response'] != 'Invalid')
+      {
+        _getCurrentLocation();
+      }
     }
     catch(e){
       print('print error: $e');
@@ -118,6 +156,10 @@ class _DashBoardState extends State<DashBoard> {
             child: Switch(
               value: isSwitched2,
               onChanged: (bool isOn) {
+                if(isOn == false)
+                  {
+                    _onSwitchCloseClick();
+                  }
                 setState(() {
                   isSwitched2 = isOn;
                   Global.shared.isSwitched2 = isOn;

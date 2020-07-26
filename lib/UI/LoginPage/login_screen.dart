@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gpstracker/Api/api.dart';
+import 'package:gpstracker/UI/Dashboard/dashboard.dart';
 import 'package:gpstracker/UI/Navigator/MyNavigator.dart';
 import 'package:gpstracker/Values/AppColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -15,6 +20,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
 
   final _formKey = GlobalKey<FormState>();
+  SharedPreferences sharedPreferences;
+  TextEditingController mobileController = TextEditingController();
   int _state = 0;
   Widget _submitButton() {
     return
@@ -55,12 +62,53 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _state = 1;
     });
-    Timer(Duration(milliseconds: 1100), () {
-      setState(() {
-        _state = 2;
-      MyNavigator.goToOTPScreen(context);
-      });
-    });
+    var data = {
+      "mobile": mobileController.text
+    };
+    print(data);
+    try {
+      var res = await CallApi().postData(data, 'DriverLogin');
+      var body = json.decode(res.body);
+      print(body);
+      if (body != null && body['response'] != 'Invalid')
+      {
+        String st = body['st'];
+        if(st == "success")
+        {
+          String user = body['uid'].toString();
+          String otp = body['otp'].toString();
+          sharedPreferences = await SharedPreferences.getInstance();
+          sharedPreferences.setString('uid', user);
+          setState(() {
+            _state = 3;
+          });
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>
+              DashBoard()));
+        }
+        else
+        {
+          Fluttertoast.showToast(
+            msg: body['msg'].toString(),
+            textColor: Colors.black,
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIos: 2,
+            fontSize: 15,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.white,
+          );
+          setState(() {
+            _state = 0;
+          });
+
+        }
+
+      }
+      else{
+      }
+    }
+    catch(e){
+      print('print error: $e');
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -126,6 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           border: InputBorder.none,
                                           fillColor: AppColors.white_50,
                                           filled: true),
+                                        controller: mobileController
                                     ),
                                   ),
                                   SizedBox(height: 50,),
