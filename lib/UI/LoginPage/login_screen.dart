@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gpstracker/UI/Navigator/MyNavigator.dart';
 import 'package:gpstracker/Values/AppColors.dart';
@@ -16,6 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final _formKey = GlobalKey<FormState>();
   int _state = 0;
+
   Widget _submitButton() {
     return
       new RawMaterialButton(
@@ -62,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final height =  MediaQuery.of(context).size.height;
